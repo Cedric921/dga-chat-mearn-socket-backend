@@ -7,9 +7,10 @@ import connectDB from './config/db';
 
 const app: Application = express();
 
-// routes import
+// routes and middlewares import
 import usersRoutes from './routes/user.routes';
 import messagesRoutes from './routes/message.routes';
+import errors from './middlewares/error.middleware';
 
 dotenv.config();
 connectDB();
@@ -26,6 +27,10 @@ app.get('/', (req: Request, res: Response) =>
 //use routes
 app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/messages', messagesRoutes);
+
+// errors middlewares
+app.use(errors.internalError);
+app.use(errors.notFoundError);
 
 const PORT: number | string | undefined = process.env.NODE_PORT || 1981;
 
