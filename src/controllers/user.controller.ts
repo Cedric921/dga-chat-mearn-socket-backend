@@ -81,7 +81,7 @@ export const loginUser = asyncHandler(
 		try {
 			const { username, email, password } = req.body;
 
-			if (!password || !username || !email) {
+			if (!password || (!username && !email)) {
 				const error = new Error('some fields missing');
 				res.status(409);
 				return next(error);

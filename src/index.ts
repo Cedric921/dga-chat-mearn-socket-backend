@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from 'express';
+import express, { Application } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -20,9 +20,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.get('/', (req: Request, res: Response) =>
-	res.json({ message: 'hello world' })
-);
+// app.use((req: Request, res: Response, next: NextFunction) =>{
+//   // eslint-disable-next-line no-console
+//   console.log(req.body)
+//   next()
+// });
 
 //use routes
 app.use('/api/v1/users', usersRoutes);
