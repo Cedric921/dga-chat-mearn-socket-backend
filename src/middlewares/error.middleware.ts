@@ -1,15 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from 'express';
 
-export const internalError = (err: Error, req: Request, res: Response, next: NextFunction) => {
+export const internalError = (
+	err: Error,
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
 	const errorCode = req.statusCode ?? 500;
-   res.status(errorCode).json({ message: err.message, stack: err.stack });
-   // next()
+	res.status(errorCode).json({ message: err.message, stack: err.stack });
+	// next()
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const notFoundError = (req: Request, res: Response, next: NextFunction) => {
-   res.status(404).json({ error: 'not found' });
+export const notFoundError = (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	res.status(404).json({ error: 'not found' });
 };
 
 const errors = { internalError, notFoundError };

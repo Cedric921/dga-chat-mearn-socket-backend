@@ -20,9 +20,9 @@ const userSchema = new Schema(
 			type: String,
 			require: false,
 		},
-		passwoord: {
+		password: {
 			type: String,
-			require: false,
+			require: true,
 		},
 	},
 	{
