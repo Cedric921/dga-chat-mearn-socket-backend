@@ -1,11 +1,16 @@
-import { loginUser, registerUser } from './../controllers/user.controller';
 import express from 'express';
-import { getAllUsers, getOneUser } from '../controllers/user.controller';
+import {
+	getAllUsers,
+	getOneUser,
+	loginUser,
+	registerUser,
+} from '../controllers/user.controller';
+import { isAuth } from '../middlewares/auth';
 
 const router = express.Router();
 
-router.get('/', getAllUsers);
-router.get('/:id', getOneUser );
+router.get('/', isAuth, getAllUsers);
+router.get('/:id', isAuth, getOneUser);
 router.post('/login', loginUser);
 router.post('/signup', registerUser);
 

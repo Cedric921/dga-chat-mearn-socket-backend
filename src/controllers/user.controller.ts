@@ -6,6 +6,7 @@ import { generateToken } from '../utils/functions';
 
 export const getAllUsers = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
+		console.log('middl =>',req.user);
 		try {
 			const users = await User.find();
 			res.status(200).json({ users });
@@ -82,7 +83,7 @@ export const loginUser = asyncHandler(
 			console.log(req.body);
 			const { username, email, password } = req.body;
 
-			if (!password && (!username || !email)) {
+			if (!password || (!username || !email)) {
 				const error = new Error('some fields missing');
 				res.status(409);
 				return next(error);
@@ -104,16 +105,14 @@ export const loginUser = asyncHandler(
 					res.status(400);
 					return next(error);
 				} else {
-					res
-						.status(201)
-						.json({
-							_id: user._id,
-							name: user.name,
-							lastname: user.lastname,
-							email: user.email,
-							username: user.username,
-							token: generateToken(user._id),
-						});
+					res.status(201).json({
+						_id: user._id,
+						name: user.name,
+						lastname: user.lastname,
+						email: user.email,
+						username: user.username,
+						token: generateToken(user._id),
+					});
 				}
 			} else {
 				const error = new Error('user not found');

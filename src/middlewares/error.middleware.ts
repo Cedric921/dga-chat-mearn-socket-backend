@@ -17,7 +17,7 @@ export const notFoundError = (
 	res: Response,
 	next: NextFunction
 ) => {
-	res.status(404).json({ error: 'not found' });
+	res.status(404).json({ error: 'data not found' });
 };
 
 const errors = { internalError, notFoundError };
