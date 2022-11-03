@@ -34,4 +34,5 @@ app.use(errors.notFoundError);
 
 const PORT: number | string | undefined = process.env.NODE_PORT || 1981;
 
+// eslint-disable-next-line no-console
 app.listen(PORT, () => console.log(`app listening on ${PORT}`));

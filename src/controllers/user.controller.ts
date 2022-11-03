@@ -6,7 +6,6 @@ import { generateToken } from '../utils/functions';
 
 export const getAllUsers = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
-		console.log('middl =>',req.user);
 		try {
 			const users = await User.find();
 			res.status(200).json({ users });
@@ -80,10 +79,9 @@ export const registerUser = asyncHandler(
 export const loginUser = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			console.log(req.body);
 			const { username, email, password } = req.body;
 
-			if (!password || (!username || !email)) {
+			if (!password || !username || !email) {
 				const error = new Error('some fields missing');
 				res.status(409);
 				return next(error);

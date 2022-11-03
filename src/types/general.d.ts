@@ -1,5 +1,6 @@
+
 declare namespace Express {
-	export type Request =  {
-		user: unknown;
-	}
+	export type Request = {
+		user: { id: string} | null;
+	};
 }
