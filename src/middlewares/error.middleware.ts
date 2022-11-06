@@ -8,7 +8,7 @@ export const internalError = (
 	next: NextFunction
 ) => {
 	const errorCode = req.statusCode ?? 500;
-	res.status(errorCode).json({ message: err.message, stack: err.stack });
+	return res.status(errorCode).json({ message: err.message, stack: err.stack });
 	// next()
 };
 
