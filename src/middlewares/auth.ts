@@ -29,7 +29,7 @@ export const isAuth = asyncHandler(
 				req.user = await User.findById(decoded.id);
 				next();
 			} catch (error) {
-				const err = new Error('Not authorized, internal error ');
+				const err = new Error('Not authorized');
 				res.json(500);
 				return next(err);
 			}
