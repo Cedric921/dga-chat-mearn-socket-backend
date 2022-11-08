@@ -5,12 +5,11 @@ import {
 	loginUser,
 	registerUser,
 } from '../controllers/user.controller';
-import { isAuth } from '../middlewares/auth';
 
 const router = express.Router();
 
-router.get('/', isAuth, getAllUsers);
-router.get('/:id', isAuth, getOneUser);
+router.get('/', getAllUsers);
+router.get('/:id', getOneUser);
 router.post('/login', loginUser);
 router.post('/signup', registerUser);
 
