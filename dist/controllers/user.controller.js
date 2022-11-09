@@ -85,7 +85,7 @@ exports.registerUser = (0, express_async_handler_1.default)((req, res, next) => 
 exports.loginUser = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { username, email, password } = req.body;
-        if (!password || !username || !email) {
+        if (!password || (!username && !email)) {
             const error = new Error('some fields missing');
             res.status(409);
             return next(error);

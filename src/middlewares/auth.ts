@@ -30,7 +30,7 @@ export const isAuth = asyncHandler(
 				next();
 			} catch (error) {
 				const err = new Error('Not authorized');
-				res.json(500);
+				res.json(400);
 				return next(err);
 			}
 		} else {

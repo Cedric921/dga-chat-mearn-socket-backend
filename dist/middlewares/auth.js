@@ -32,8 +32,8 @@ exports.isAuth = (0, express_async_handler_1.default)((req, res, next) => __awai
             next();
         }
         catch (error) {
-            const err = new Error('Not authorized, internal error ');
-            res.json(500);
+            const err = new Error('Not authorized');
+            res.json(400);
             return next(err);
         }
     }

@@ -19,7 +19,7 @@ export const getMessages = asyncHandler(
 						$all: [senderId, receiver],
 					},
 				});
-				res.status(200).json({ messages, sender: senderId, receiver });
+				res.status(200).json(messages);
 			} catch (err) {
 				const error = new Error('some data, fields missings');
 				res.status(400);

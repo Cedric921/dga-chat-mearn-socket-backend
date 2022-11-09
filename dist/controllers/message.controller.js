@@ -17,8 +17,10 @@ const express_async_handler_1 = __importDefault(require("express-async-handler")
 // import User from '../models/user.model';
 const message_model_1 = __importDefault(require("../models/message.model"));
 exports.getMessages = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { sender, receiver } = req.body;
-    if (!sender || !receiver) {
+    var _a;
+    const { receiver } = req.body;
+    const senderId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+    if (!senderId || !receiver) {
         const error = new Error('some data, fields missings');
         res.status(400);
         return next(error);
@@ -27,10 +29,10 @@ exports.getMessages = (0, express_async_handler_1.default)((req, res, next) => _
         try {
             const messages = yield message_model_1.default.find({
                 users: {
-                    $all: [sender, receiver],
+                    $all: [senderId, receiver],
                 },
             });
-            res.status(200).json({ messages, sender, receiver });
+            res.status(200).json({ messages, sender: senderId, receiver });
         }
         catch (err) {
             const error = new Error('some data, fields missings');
@@ -40,20 +42,22 @@ exports.getMessages = (0, express_async_handler_1.default)((req, res, next) => _
     }
 }));
 exports.addMessage = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const { sender, receiver, content } = req.body;
-    if (!sender || !receiver) {
+    var _b;
+    const { receiver, content } = req.body;
+    const senderId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.id;
+    if (!senderId || !receiver) {
         const error = new Error('some data, fields missings');
         res.status(400);
         return next(error);
     }
     else {
         try {
-            const message = new message_model_1.default({
+            const message = yield message_model_1.default.create({
                 content,
-                users: [sender, receiver],
-                sender,
+                users: [senderId, receiver],
+                sender: senderId,
             });
-            res.status(200).json({ message });
+            res.status(201).json({ message });
         }
         catch (err) {
             const error = new Error('internal error');
