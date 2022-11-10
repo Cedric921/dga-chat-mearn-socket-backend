@@ -24,6 +24,7 @@ const userSchema = new Schema(
 			type: String,
 			require: true,
 		},
+		imageUrl: String,
 	},
 	{
 		timestamps: true,

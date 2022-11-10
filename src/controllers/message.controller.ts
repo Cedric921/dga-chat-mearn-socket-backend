@@ -19,7 +19,7 @@ export const getMessages = asyncHandler(
 						$all: [senderId, receiver],
 					},
 				});
-				res.status(200).json({ messages, sender: senderId, receiver });
+				res.status(200).json(messages);
 			} catch (err) {
 				const error = new Error('some data, fields missings');
 				res.status(400);
@@ -44,7 +44,7 @@ export const addMessage = asyncHandler(
 					users: [senderId, receiver],
 					sender: senderId,
 				});
-				res.status(201).json({ message });
+				res.status(201).json(message);
 			} catch (err) {
 				const error = new Error('internal error');
 				res.status(500);
