@@ -66,6 +66,7 @@ export const registerUser = asyncHandler(
 				lastname: user.lastname,
 				email: user.email,
 				username: user.username,
+				imageUrl: user.imageUrl,
 				token: generateToken(user._id),
 			});
 		} else {
@@ -109,6 +110,7 @@ export const loginUser = asyncHandler(
 						lastname: user.lastname,
 						email: user.email,
 						username: user.username,
+						imageUrl: user.imageUrl,
 						token: generateToken(user._id),
 					});
 				}
@@ -134,12 +136,21 @@ export const updateImage = asyncHandler(
 				return next(error);
 			}
 			const userId = req.user?.id;
-			const imageUrl = req.file.path;
+			const imageUrl = '/images/' + req.file.filename;
 			const user = await User.findById(userId);
 			if (user) {
 				user.imageUrl = imageUrl;
 				await user.save();
-				res.json(user);
+
+				res.status(201).json({
+					_id: user._id,
+					name: user.name,
+					lastname: user.lastname,
+					email: user.email,
+					username: user.username,
+					imageUrl: user.imageUrl,
+					token: generateToken(user._id),
+				});
 			}
 		} catch (err) {
 			const error = new Error('internal error');

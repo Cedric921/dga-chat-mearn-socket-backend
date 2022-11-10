@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginUser = exports.registerUser = exports.getOneUser = exports.getAllUsers = void 0;
+exports.updateImage = exports.loginUser = exports.registerUser = exports.getOneUser = exports.getAllUsers = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_model_1 = __importDefault(require("../models/user.model"));
@@ -120,6 +120,29 @@ exports.loginUser = (0, express_async_handler_1.default)((req, res, next) => __a
             const error = new Error('user not found');
             res.status(400);
             return next(error);
+        }
+    }
+    catch (err) {
+        const error = new Error('internal error');
+        res.status(500);
+        return next(error);
+    }
+}));
+exports.updateImage = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        if (!req.file) {
+            const error = new Error('No image provided');
+            res.status(400);
+            return next(error);
+        }
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const imageUrl = req.file.path;
+        const user = yield user_model_1.default.findById(userId);
+        if (user) {
+            user.imageUrl = imageUrl;
+            yield user.save();
+            res.json(user);
         }
     }
     catch (err) {
