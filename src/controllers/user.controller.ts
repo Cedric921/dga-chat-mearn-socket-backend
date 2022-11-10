@@ -124,3 +124,27 @@ export const loginUser = asyncHandler(
 		}
 	}
 );
+
+export const updateImage = asyncHandler(
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			if (!req.file) {
+				const error = new Error('No image provided');
+				res.status(400);
+				return next(error);
+			}
+			const userId = req.user?.id;
+			const imageUrl = req.file.path;
+			const user = await User.findById(userId);
+			if (user) {
+				user.imageUrl = imageUrl;
+				await user.save();
+				res.json(user);
+			}
+		} catch (err) {
+			const error = new Error('internal error');
+			res.status(500);
+			return next(error);
+		}
+	}
+);

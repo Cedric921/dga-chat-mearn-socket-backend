@@ -32,7 +32,7 @@ exports.getMessages = (0, express_async_handler_1.default)((req, res, next) => _
                     $all: [senderId, receiver],
                 },
             });
-            res.status(200).json({ messages, sender: senderId, receiver });
+            res.status(200).json(messages);
         }
         catch (err) {
             const error = new Error('some data, fields missings');
@@ -57,7 +57,7 @@ exports.addMessage = (0, express_async_handler_1.default)((req, res, next) => __
                 users: [senderId, receiver],
                 sender: senderId,
             });
-            res.status(201).json({ message });
+            res.status(201).json(message);
         }
         catch (err) {
             const error = new Error('internal error');
