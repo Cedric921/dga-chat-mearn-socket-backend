@@ -44,7 +44,7 @@ export const addMessage = asyncHandler(
 					users: [senderId, receiver],
 					sender: senderId,
 				});
-				res.status(201).json({ message });
+				res.status(201).json(message);
 			} catch (err) {
 				const error = new Error('internal error');
 				res.status(500);
