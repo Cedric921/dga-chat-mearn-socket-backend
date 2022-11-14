@@ -2,13 +2,14 @@ import asyncHandler from 'express-async-handler';
 import { NextFunction, Request, Response } from 'express';
 // import User from '../models/user.model';
 import Message from '../models/message.model';
+import socket from '../socket';
 
 export const getMessages = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
-		const { receiver } = req.body;
+		const receiverId = req.params.id;
 		const senderId = req.user?.id;
 
-		if (!senderId || !receiver) {
+		if (!senderId || !receiverId) {
 			const error = new Error('some data, fields missings');
 			res.status(400);
 			return next(error);
@@ -16,7 +17,7 @@ export const getMessages = asyncHandler(
 			try {
 				const messages = await Message.find({
 					users: {
-						$all: [senderId, receiver],
+						$all: [senderId, receiverId],
 					},
 				});
 				res.status(200).json(messages);
@@ -31,9 +32,10 @@ export const getMessages = asyncHandler(
 
 export const addMessage = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
-		const { receiver, content } = req.body;
+		const receiverId = req.params.id;
+		const { content } = req.body;
 		const senderId = req.user?.id;
-		if (!senderId || !receiver) {
+		if (!senderId || !receiverId) {
 			const error = new Error('some data, fields missings');
 			res.status(400);
 			return next(error);
@@ -41,9 +43,10 @@ export const addMessage = asyncHandler(
 			try {
 				const message = await Message.create({
 					content,
-					users: [senderId, receiver],
+					users: [senderId, receiverId],
 					sender: senderId,
 				});
+				socket.getIO().emit('messages', { action: 'create', message: message });
 				res.status(201).json(message);
 			} catch (err) {
 				const error = new Error('internal error');

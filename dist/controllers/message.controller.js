@@ -16,11 +16,12 @@ exports.addMessage = exports.getMessages = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 // import User from '../models/user.model';
 const message_model_1 = __importDefault(require("../models/message.model"));
+const socket_1 = __importDefault(require("../socket"));
 exports.getMessages = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const { receiver } = req.body;
+    const receiverId = req.params.id;
     const senderId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
-    if (!senderId || !receiver) {
+    if (!senderId || !receiverId) {
         const error = new Error('some data, fields missings');
         res.status(400);
         return next(error);
@@ -29,7 +30,7 @@ exports.getMessages = (0, express_async_handler_1.default)((req, res, next) => _
         try {
             const messages = yield message_model_1.default.find({
                 users: {
-                    $all: [senderId, receiver],
+                    $all: [senderId, receiverId],
                 },
             });
             res.status(200).json(messages);
@@ -43,9 +44,10 @@ exports.getMessages = (0, express_async_handler_1.default)((req, res, next) => _
 }));
 exports.addMessage = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _b;
-    const { receiver, content } = req.body;
+    const receiverId = req.params.id;
+    const { content } = req.body;
     const senderId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.id;
-    if (!senderId || !receiver) {
+    if (!senderId || !receiverId) {
         const error = new Error('some data, fields missings');
         res.status(400);
         return next(error);
@@ -54,9 +56,10 @@ exports.addMessage = (0, express_async_handler_1.default)((req, res, next) => __
         try {
             const message = yield message_model_1.default.create({
                 content,
-                users: [senderId, receiver],
+                users: [senderId, receiverId],
                 sender: senderId,
             });
+            socket_1.default.getIO().emit('messages', { action: 'create', message: message });
             res.status(201).json(message);
         }
         catch (err) {

@@ -33,7 +33,7 @@ exports.isAuth = (0, express_async_handler_1.default)((req, res, next) => __awai
         }
         catch (error) {
             const err = new Error('Not authorized');
-            res.json(400);
+            res.status(400);
             return next(err);
         }
     }

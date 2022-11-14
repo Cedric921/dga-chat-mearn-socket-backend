@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginUser = exports.registerUser = exports.getOneUser = exports.getAllUsers = void 0;
+exports.updateUser = exports.updateImage = exports.loginUser = exports.registerUser = exports.getOneUser = exports.getAllUsers = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_model_1 = __importDefault(require("../models/user.model"));
@@ -73,6 +73,7 @@ exports.registerUser = (0, express_async_handler_1.default)((req, res, next) => 
             lastname: user.lastname,
             email: user.email,
             username: user.username,
+            imageUrl: user.imageUrl,
             token: (0, functions_1.generateToken)(user._id),
         });
     }
@@ -112,6 +113,7 @@ exports.loginUser = (0, express_async_handler_1.default)((req, res, next) => __a
                     lastname: user.lastname,
                     email: user.email,
                     username: user.username,
+                    imageUrl: user.imageUrl,
                     token: (0, functions_1.generateToken)(user._id),
                 });
             }
@@ -127,4 +129,56 @@ exports.loginUser = (0, express_async_handler_1.default)((req, res, next) => __a
         res.status(500);
         return next(error);
     }
+}));
+exports.updateImage = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        if (!req.file) {
+            const error = new Error('No image provided');
+            res.status(400);
+            return next(error);
+        }
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const imageUrl = '/images/' + req.file.filename;
+        const user = yield user_model_1.default.findById(userId);
+        if (user) {
+            user.imageUrl = imageUrl;
+            yield user.save();
+            res.status(201).json({
+                _id: user._id,
+                name: user.name,
+                lastname: user.lastname,
+                email: user.email,
+                username: user.username,
+                imageUrl: user.imageUrl,
+                token: (0, functions_1.generateToken)(user._id),
+            });
+        }
+    }
+    catch (err) {
+        const error = new Error('internal error');
+        res.status(500);
+        return next(error);
+    }
+}));
+exports.updateUser = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { name, lastname, email, username } = req.body;
+    if (!id) {
+        const error = new Error('user invalid');
+        res.status(400);
+        return next(error);
+    }
+    const user = yield user_model_1.default.findByIdAndUpdate(id, {
+        name,
+        lastname,
+        email,
+        username,
+    });
+    if (!user) {
+        const error = new Error('User wthi id ${id} not found');
+        res.status(400);
+        return next(error);
+    }
+    res.status(201).json(user);
 }));

@@ -1,9 +1,11 @@
 import express, { Application } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import { createServer } from 'http';
 import morgan from 'morgan';
 import multer from 'multer';
 import path from 'path';
+import socket from './socket';
 
 // db config import
 import connectDB from './config/db';
@@ -64,5 +66,16 @@ app.use(errors.notFoundError);
 
 const PORT: number | string | undefined = process.env.NODE_PORT || 1981;
 
-// eslint-disable-next-line no-console
-app.listen(PORT, () => console.log(`app listening on ${PORT}`));
+const httpServer = createServer(app).listen(PORT, () =>
+	// eslint-disable-next-line no-console
+	console.log(`app listening on ${PORT}`)
+);
+
+const io = socket.init(httpServer);
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+io.on('connection', (socket: any) => {
+	// eslint-disable-next-line no-console
+	console.log('socket connected to client');
+	socket.emit('message', 'hello world');
+});

@@ -66,6 +66,7 @@ export const registerUser = asyncHandler(
 				lastname: user.lastname,
 				email: user.email,
 				username: user.username,
+				imageUrl: user.imageUrl,
 				token: generateToken(user._id),
 			});
 		} else {
@@ -109,6 +110,7 @@ export const loginUser = asyncHandler(
 						lastname: user.lastname,
 						email: user.email,
 						username: user.username,
+						imageUrl: user.imageUrl,
 						token: generateToken(user._id),
 					});
 				}
@@ -134,17 +136,50 @@ export const updateImage = asyncHandler(
 				return next(error);
 			}
 			const userId = req.user?.id;
-			const imageUrl = req.file.path;
+			const imageUrl = '/images/' + req.file.filename;
 			const user = await User.findById(userId);
 			if (user) {
 				user.imageUrl = imageUrl;
 				await user.save();
-				res.json(user);
+
+				res.status(201).json({
+					_id: user._id,
+					name: user.name,
+					lastname: user.lastname,
+					email: user.email,
+					username: user.username,
+					imageUrl: user.imageUrl,
+					token: generateToken(user._id),
+				});
 			}
 		} catch (err) {
 			const error = new Error('internal error');
 			res.status(500);
 			return next(error);
 		}
+	}
+);
+
+export const updateUser = asyncHandler(
+	async (req: Request, res: Response, next: NextFunction) => {
+		const { id } = req.params;
+		const { name, lastname, email, username } = req.body;
+		if (!id) {
+			const error = new Error('user invalid');
+			res.status(400);
+			return next(error);
+		}
+		const user = await User.findByIdAndUpdate(id, {
+			name,
+			lastname,
+			email,
+			username,
+		});
+		if (!user) {
+			const error = new Error('User wthi id ${id} not found');
+			res.status(400);
+			return next(error);
+		}
+		res.status(201).json(user);
 	}
 );
