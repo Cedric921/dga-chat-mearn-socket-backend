@@ -159,3 +159,27 @@ export const updateImage = asyncHandler(
 		}
 	}
 );
+
+export const updateUser = asyncHandler(
+	async (req: Request, res: Response, next: NextFunction) => {
+		const { id } = req.params;
+		const { name, lastname, email, username } = req.body;
+		if (!id) {
+			const error = new Error('user invalid');
+			res.status(400);
+			return next(error);
+		}
+		const user = await User.findByIdAndUpdate(id, {
+			name,
+			lastname,
+			email,
+			username,
+		});
+		if (!user) {
+			const error = new Error('User wthi id ${id} not found');
+			res.status(400);
+			return next(error);
+		}
+		res.status(201).json(user);
+	}
+);

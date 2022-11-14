@@ -6,9 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
+const http_1 = require("http");
 const morgan_1 = __importDefault(require("morgan"));
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
+const socket_1 = __importDefault(require("./socket"));
 // db config import
 const db_1 = __importDefault(require("./config/db"));
 const app = (0, express_1.default)();
@@ -54,5 +56,13 @@ app.use('/api/v1/messages', message_routes_1.default);
 app.use(error_middleware_1.default.internalError);
 app.use(error_middleware_1.default.notFoundError);
 const PORT = process.env.NODE_PORT || 1981;
+const httpServer = (0, http_1.createServer)(app).listen(PORT, () => 
 // eslint-disable-next-line no-console
-app.listen(PORT, () => console.log(`app listening on ${PORT}`));
+console.log(`app listening on ${PORT}`));
+const io = socket_1.default.init(httpServer);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+io.on('connection', (socket) => {
+    // eslint-disable-next-line no-console
+    console.log('socket connected to client');
+    socket.emit('message', 'hello world');
+});

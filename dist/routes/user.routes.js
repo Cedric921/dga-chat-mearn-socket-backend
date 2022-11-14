@@ -9,6 +9,7 @@ const auth_1 = require("../middlewares/auth");
 const router = express_1.default.Router();
 router.get('/', user_controller_1.getAllUsers);
 router.get('/:id', user_controller_1.getOneUser);
+router.put('/:id', user_controller_1.updateUser);
 router.post('/login', user_controller_1.loginUser);
 router.post('/signup', user_controller_1.registerUser);
 router.post('/image', auth_1.isAuth, user_controller_1.updateImage);

@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import { NextFunction, Request, Response } from 'express';
 // import User from '../models/user.model';
 import Message from '../models/message.model';
+import socket from '../socket';
 
 export const getMessages = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
@@ -45,6 +46,7 @@ export const addMessage = asyncHandler(
 					users: [senderId, receiverId],
 					sender: senderId,
 				});
+				socket.getIO().emit('messages', { action: 'create', message: message });
 				res.status(201).json(message);
 			} catch (err) {
 				const error = new Error('internal error');
