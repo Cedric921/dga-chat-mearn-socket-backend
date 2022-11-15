@@ -3,6 +3,7 @@ import asyncHandler from 'express-async-handler';
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model';
 import { generateToken } from '../utils/functions';
+import mongoose from 'mongoose';
 
 export const getAllUsers = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
@@ -169,14 +170,17 @@ export const updateUser = asyncHandler(
 			res.status(400);
 			return next(error);
 		}
-		const user = await User.findByIdAndUpdate(id, {
-			name,
-			lastname,
-			email,
-			username,
-		});
+		const user = await User.findOneAndUpdate(
+			{ _id: new mongoose.Types.ObjectId(id) },
+			{
+				name,
+				lastname,
+				email,
+				username,
+			}
+		);
 		if (!user) {
-			const error = new Error('User wthi id ${id} not found');
+			const error = new Error(`User wthi id ${id} not found`);
 			res.status(400);
 			return next(error);
 		}
