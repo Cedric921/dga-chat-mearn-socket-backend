@@ -17,6 +17,7 @@ const express_async_handler_1 = __importDefault(require("express-async-handler")
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_model_1 = __importDefault(require("../models/user.model"));
 const functions_1 = require("../utils/functions");
+const mongoose_1 = __importDefault(require("mongoose"));
 exports.getAllUsers = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield user_model_1.default.find();
@@ -169,14 +170,14 @@ exports.updateUser = (0, express_async_handler_1.default)((req, res, next) => __
         res.status(400);
         return next(error);
     }
-    const user = yield user_model_1.default.findByIdAndUpdate(id, {
+    const user = yield user_model_1.default.findOneAndUpdate({ _id: new mongoose_1.default.Types.ObjectId(id) }, {
         name,
         lastname,
         email,
         username,
     });
     if (!user) {
-        const error = new Error('User wthi id ${id} not found');
+        const error = new Error(`User wthi id ${id} not found`);
         res.status(400);
         return next(error);
     }
