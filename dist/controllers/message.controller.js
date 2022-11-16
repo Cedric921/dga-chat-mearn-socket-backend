@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addMessage = exports.getMessages = void 0;
+exports.addMessage = exports.getUsersMessages = exports.getMessages = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 // import User from '../models/user.model';
 const message_model_1 = __importDefault(require("../models/message.model"));
 const socket_1 = __importDefault(require("../socket"));
+const mongoose_1 = __importDefault(require("mongoose"));
 exports.getMessages = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const receiverId = req.params.id;
@@ -42,11 +43,35 @@ exports.getMessages = (0, express_async_handler_1.default)((req, res, next) => _
         }
     }
 }));
-exports.addMessage = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getUsersMessages = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _b;
+    const senderId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.id;
+    if (!senderId) {
+        const error = new Error('sender id  missings');
+        res.status(400);
+        return next(error);
+    }
+    else {
+        try {
+            const messages = yield message_model_1.default.find({
+                users: {
+                    $in: [senderId],
+                },
+            }).populate('users');
+            res.status(200).json(messages.reverse());
+        }
+        catch (err) {
+            const error = new Error('internal error');
+            res.status(500);
+            return next(error);
+        }
+    }
+}));
+exports.addMessage = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _c;
     const receiverId = req.params.id;
     const { content } = req.body;
-    const senderId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.id;
+    const senderId = (_c = req.user) === null || _c === void 0 ? void 0 : _c.id;
     if (!senderId || !receiverId) {
         const error = new Error('some data, fields missings');
         res.status(400);
@@ -56,7 +81,10 @@ exports.addMessage = (0, express_async_handler_1.default)((req, res, next) => __
         try {
             const message = yield message_model_1.default.create({
                 content,
-                users: [senderId, receiverId],
+                users: [
+                    new mongoose_1.default.Types.ObjectId(senderId),
+                    new mongoose_1.default.Types.ObjectId(receiverId),
+                ],
                 sender: senderId,
             });
             socket_1.default.getIO().emit('messages', { action: 'create', message: message });
