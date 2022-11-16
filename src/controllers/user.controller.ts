@@ -46,7 +46,7 @@ export const registerUser = asyncHandler(
 		const existUser = await User.findOne({ email });
 		if (existUser) {
 			const err = new Error('user already exist');
-			res.status(500);
+			res.status(409);
 			return next(err);
 		}
 

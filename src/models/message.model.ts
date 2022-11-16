@@ -10,7 +10,10 @@ const messageShema = new Schema(
 			ref: 'User',
 			require: true,
 		},
-		users: Array,
+		users: {
+			type: [mongoose.Schema.Types.ObjectId],
+			ref: 'User',
+		},
 	},
 	{
 		timestamps: true,

@@ -55,7 +55,7 @@ exports.registerUser = (0, express_async_handler_1.default)((req, res, next) => 
     const existUser = yield user_model_1.default.findOne({ email });
     if (existUser) {
         const err = new Error('user already exist');
-        res.status(500);
+        res.status(409);
         return next(err);
     }
     // hash password
