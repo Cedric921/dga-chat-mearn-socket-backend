@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import User from '../models/user.model';
 import { generateToken } from '../utils/functions';
 import mongoose from 'mongoose';
+import cloudinary from '../config/cloudinary';
 
 export const getAllUsers = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
@@ -42,6 +43,11 @@ export const registerUser = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
 		const { name, lastname, email, username, password } = req.body;
 
+		if (!password || !username || !email) {
+			const error = new Error('some fields missing');
+			res.status(409);
+			return next(error);
+		}
 		// check if user exist
 		const existUser = await User.findOne({ email });
 		if (existUser) {
@@ -136,11 +142,16 @@ export const updateImage = asyncHandler(
 				res.status(400);
 				return next(error);
 			}
+			const resCloud = await cloudinary.uploader.upload(req.file.path, {
+				cloud_name: process.env.CLOUDINARY_NAME,
+				api_key: process.env.CLOUDINARY_API_KEY,
+				api_secret: process.env.CLOUDINARY_API_SECRET,
+			});
 			const userId = req.user?.id;
-			const imageUrl = '/images/' + req.file.filename;
 			const user = await User.findById(userId);
 			if (user) {
-				user.imageUrl = imageUrl;
+				user.imageUrl = resCloud.secure_url;
+				user.cloudinary_id = resCloud.public_id;
 				await user.save();
 
 				res.status(201).json({
@@ -153,8 +164,8 @@ export const updateImage = asyncHandler(
 					token: generateToken(user._id),
 				});
 			}
-		} catch (err) {
-			const error = new Error('internal error');
+		} catch (err: any) {
+			const error = new Error(err);
 			res.status(500);
 			return next(error);
 		}
