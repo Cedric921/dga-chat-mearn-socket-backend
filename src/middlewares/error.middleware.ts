@@ -8,7 +8,8 @@ export const internalError = (
 	next: NextFunction
 ) => {
 	const errorCode = req.statusCode ?? 500;
-	res.status(errorCode).json({ message: err.message, stack: err.stack });
+	const stack = process.env.ENV === 'production' ? err.message : err.stack;
+	res.status(errorCode).json({ message: err.message, stack });
 	// next()
 };
 
