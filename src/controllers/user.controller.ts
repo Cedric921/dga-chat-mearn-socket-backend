@@ -5,6 +5,7 @@ import User from '../models/user.model';
 import { generateToken } from '../utils/functions';
 import mongoose from 'mongoose';
 import cloudinary from '../config/cloudinary';
+import { validateLoginData, validateRegister } from '../utils/validation';
 
 export const getAllUsers = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
@@ -41,13 +42,14 @@ export const getOneUser = asyncHandler(
 
 export const registerUser = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
+		const validation = validateRegister(req.body);
+		if (validation.error) {
+			const err = new Error('invalid user data provided');
+			res.status(400);
+			return next(err);
+		}
 		const { name, lastname, email, username, password } = req.body;
 
-		if (!password || !username || !email) {
-			const error = new Error('some fields missing');
-			res.status(409);
-			return next(error);
-		}
 		// check if user exist
 		const existUser = await User.findOne({ email });
 		if (existUser) {
@@ -87,6 +89,13 @@ export const registerUser = asyncHandler(
 export const loginUser = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
+			const validation = validateLoginData(req.body);
+			if (validation.error) {
+				const err = new Error('Email or password is incorrect');
+				res.status(400);
+				return next(err);
+			}
+
 			const { username, email, password } = req.body;
 
 			if (!password || (!username && !email)) {
@@ -164,6 +173,7 @@ export const updateImage = asyncHandler(
 					token: generateToken(user._id),
 				});
 			}
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (err: any) {
 			const error = new Error(err);
 			res.status(500);
