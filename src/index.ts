@@ -20,33 +20,6 @@ import errors from './middlewares/error.middleware';
 dotenv.config();
 connectDB();
 
-// const fileStorage = multer.diskStorage({
-// 	destination: (req, file, cb) => {
-// 		cb(null, path.join(__dirname, 'images'));
-// 	},
-// 	filename: (req, file, cb) => {
-// 		cb(
-// 			null,
-// 			new Date().toISOString().replace(/:/g, '-') +
-// 				'-' +
-// 				file.originalname.replace(/ /g, '-')
-// 		);
-// 	},
-// });
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// const fileFilter = (req: any, file: any, cb: any) => {
-// 	if (
-// 		file.mimetype === 'image/png' ||
-// 		file.mimetype === 'image/jpg' ||
-// 		file.mimetype === 'image/jpeg'
-// 	) {
-// 		cb(null, true);
-// 	} else {
-// 		cb(null, false);
-// 	}
-// };
-
 // middlewares
 app.use(cors());
 app.use(express.json());
