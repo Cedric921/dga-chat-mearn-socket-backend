@@ -17,14 +17,14 @@ export const validateRegister = (userData: {
 	username: string;
 	password: string;
 	lastname: string;
-	firstname: string;
+	name: string;
 }) => {
 	const registerSchema = Joi.object({
 		email: Joi.string().email().required(),
 		username: Joi.string().min(2).required(),
 		password: Joi.string().min(6).max(32).required(),
 		lastname: Joi.string(),
-		firstname: Joi.string(),
+		name: Joi.string(),
 	});
 	return registerSchema.validate(userData);
 };
