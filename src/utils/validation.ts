@@ -16,6 +16,7 @@ export const validateRegister = (userData: {
 	email: string;
 	username: string;
 	password: string;
+	password2: string;
 	lastname: string;
 	name: string;
 }) => {
@@ -23,6 +24,7 @@ export const validateRegister = (userData: {
 		email: Joi.string().email().required(),
 		username: Joi.string().min(2).required(),
 		password: Joi.string().min(6).max(32).required(),
+		password2: Joi.ref('password'),
 		lastname: Joi.string(),
 		name: Joi.string(),
 	});
