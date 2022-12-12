@@ -3,7 +3,6 @@ import asyncHandler from 'express-async-handler';
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model';
 import { generateToken } from '../utils/functions';
-import mongoose from 'mongoose';
 import cloudinary from '../config/cloudinary';
 import { validateLoginData, validateRegister } from '../utils/validation';
 
@@ -185,26 +184,53 @@ export const updateImage = asyncHandler(
 export const updateUser = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
 		const { id } = req.params;
-		const { name, lastname, email, username } = req.body;
+		const {
+			name,
+			lastname,
+			email,
+			username,
+			password,
+			password2,
+			currentpassword,
+		} = req.body;
 		if (!id) {
 			const error = new Error('user invalid');
 			res.status(400);
 			return next(error);
 		}
-		const user = await User.findOneAndUpdate(
-			{ _id: new mongoose.Types.ObjectId(id) },
-			{
-				name,
-				lastname,
-				email,
-				username,
+		const user = await User.findById(id);
+		if (user) {
+			const passwordMatched = await bcrypt.compare(
+				currentpassword,
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				user.password!
+			);
+			if (!passwordMatched) {
+				const error = new Error('invalid current password');
+				res.status(400);
+				return next(error);
 			}
-		);
-		if (!user) {
+			if (password && password2 && password !== password2) {
+				const error = new Error('new password validation error');
+				res.status(400);
+				return next(error);
+			}
+			const hashedNewPassword =
+				password === password2
+					? await bcrypt.hash(password, await bcrypt.genSalt(10))
+					: user.password;
+			const updatedUser = await User.updateOne(user._id, {
+				name: name || user.name,
+				lastname: lastname || user.lastname,
+				email: email || user.email,
+				username: username || user.username,
+				password: hashedNewPassword,
+			});
+			res.status(201).json(updatedUser);
+		} else {
 			const error = new Error(`User wthi id ${id} not found`);
 			res.status(400);
 			return next(error);
 		}
-		res.status(201).json(user);
 	}
 );
