@@ -2,7 +2,7 @@ import chaiHttp from 'chai-http';
 import { describe } from 'mocha';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import app from '../src';
+// import app from '../src';
 
 chai.use(chaiAsPromised);
 chai.use(chaiHttp);
