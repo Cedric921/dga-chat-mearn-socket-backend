@@ -4,6 +4,7 @@
 import app from '../src/index';
 import request from 'supertest';
 let token = '';
+let singleuserId = '';
 describe('AUTH TESTS', () => {
 	describe('should return a 404 respoonse', () => {
 		it('Hello API Request', async () => {
@@ -38,17 +39,22 @@ describe('AUTH TESTS', () => {
 
 		it('should return the users list', async () => {
 			//
-			const res = await await request(app)
+			const res = await request(app)
 				.get('/api/v1/users')
 				.auth(token, { type: 'bearer' });
 
 			expect(res.status).toEqual(200);
+			singleuserId = res.body.users[0]._id;
 		});
 	});
 });
 
 describe('MESSAGES TETS', () => {
-	it('should return all messages for connected user', async () => {
-		//
+	it(`should return all messages for connected user and ${singleuserId} user`, async () => {
+		const res = await request(app)
+			.get(`/api/v1/messages/${singleuserId}`)
+			.auth(token, { type: 'bearer' });
+
+		expect(res.status).toEqual(200);
 	});
 });
