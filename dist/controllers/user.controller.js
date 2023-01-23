@@ -17,7 +17,8 @@ const express_async_handler_1 = __importDefault(require("express-async-handler")
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const user_model_1 = __importDefault(require("../models/user.model"));
 const functions_1 = require("../utils/functions");
-const mongoose_1 = __importDefault(require("mongoose"));
+const cloudinary_1 = __importDefault(require("../config/cloudinary"));
+const validation_1 = require("../utils/validation");
 exports.getAllUsers = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield user_model_1.default.find();
@@ -50,6 +51,12 @@ exports.getOneUser = (0, express_async_handler_1.default)(
     }
 }));
 exports.registerUser = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const validation = (0, validation_1.validateRegister)(req.body);
+    if (validation.error) {
+        const err = new Error('invalid user data provided');
+        res.status(400);
+        return next(err);
+    }
     const { name, lastname, email, username, password } = req.body;
     // check if user exist
     const existUser = yield user_model_1.default.findOne({ email });
@@ -86,6 +93,12 @@ exports.registerUser = (0, express_async_handler_1.default)((req, res, next) => 
 }));
 exports.loginUser = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const validation = (0, validation_1.validateLoginData)(req.body);
+        if (validation.error) {
+            const err = new Error('Email or password is incorrect');
+            res.status(400);
+            return next(err);
+        }
         const { username, email, password } = req.body;
         if (!password || (!username && !email)) {
             const error = new Error('some fields missing');
@@ -139,11 +152,16 @@ exports.updateImage = (0, express_async_handler_1.default)((req, res, next) => _
             res.status(400);
             return next(error);
         }
+        const resCloud = yield cloudinary_1.default.uploader.upload(req.file.path, {
+            cloud_name: process.env.CLOUDINARY_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+        });
         const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
-        const imageUrl = '/images/' + req.file.filename;
         const user = yield user_model_1.default.findById(userId);
         if (user) {
-            user.imageUrl = imageUrl;
+            user.imageUrl = resCloud.secure_url;
+            user.cloudinary_id = resCloud.public_id;
             yield user.save();
             res.status(201).json({
                 _id: user._id,
@@ -155,31 +173,52 @@ exports.updateImage = (0, express_async_handler_1.default)((req, res, next) => _
                 token: (0, functions_1.generateToken)(user._id),
             });
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }
     catch (err) {
-        const error = new Error('internal error');
+        const error = new Error(err);
         res.status(500);
         return next(error);
     }
 }));
 exports.updateUser = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const { name, lastname, email, username } = req.body;
+    const { name, lastname, email, username, password, password2, currentpassword, } = req.body;
     if (!id) {
         const error = new Error('user invalid');
         res.status(400);
         return next(error);
     }
-    const user = yield user_model_1.default.findOneAndUpdate({ _id: new mongoose_1.default.Types.ObjectId(id) }, {
-        name,
-        lastname,
-        email,
-        username,
-    });
-    if (!user) {
+    const user = yield user_model_1.default.findById(id);
+    if (user) {
+        const passwordMatched = yield bcryptjs_1.default.compare(currentpassword, 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        user.password);
+        if (!passwordMatched) {
+            const error = new Error('invalid current password');
+            res.status(400);
+            return next(error);
+        }
+        if (password && password2 && password !== password2) {
+            const error = new Error('new password validation error');
+            res.status(400);
+            return next(error);
+        }
+        const hashedNewPassword = password === password2
+            ? yield bcryptjs_1.default.hash(password, yield bcryptjs_1.default.genSalt(10))
+            : user.password;
+        const updatedUser = yield user_model_1.default.updateOne(user._id, {
+            name: name || user.name,
+            lastname: lastname || user.lastname,
+            email: email || user.email,
+            username: username || user.username,
+            password: hashedNewPassword,
+        });
+        res.status(201).json(updatedUser);
+    }
+    else {
         const error = new Error(`User wthi id ${id} not found`);
         res.status(400);
         return next(error);
     }
-    res.status(201).json(user);
 }));
