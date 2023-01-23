@@ -27,6 +27,7 @@ const userSchema = new Schema({
         require: true,
     },
     imageUrl: String,
+    cloudinary_id: String,
 }, {
     timestamps: true,
 });

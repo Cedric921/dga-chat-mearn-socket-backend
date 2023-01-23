@@ -51,3 +51,5 @@ io.on('connection', (socket: any) => {
 	console.log('socket connected to client');
 	socket.emit('message', 'hello world');
 });
+
+export default app;
