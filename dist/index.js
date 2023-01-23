@@ -8,7 +8,6 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const http_1 = require("http");
 const morgan_1 = __importDefault(require("morgan"));
-const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const socket_1 = __importDefault(require("./socket"));
 // db config import
@@ -21,32 +20,11 @@ const error_middleware_1 = __importDefault(require("./middlewares/error.middlewa
 // config
 dotenv_1.default.config();
 (0, db_1.default)();
-const fileStorage = multer_1.default.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path_1.default.join(__dirname, 'images'));
-    },
-    filename: (req, file, cb) => {
-        cb(null, new Date().toISOString().replace(/:/g, '-') +
-            '-' +
-            file.originalname.replace(/ /g, '-'));
-    },
-});
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype === 'image/png' ||
-        file.mimetype === 'image/jpg' ||
-        file.mimetype === 'image/jpeg') {
-        cb(null, true);
-    }
-    else {
-        cb(null, false);
-    }
-};
 // middlewares
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
-app.use((0, multer_1.default)({ fileFilter, storage: fileStorage }).single('image'));
+// app.use(multer({ fileFilter, storage: fileStorage }).single('image'));
 app.use((0, morgan_1.default)('dev'));
 app.use('/images', express_1.default.static(path_1.default.join(__dirname, 'images')));
 //use routes
@@ -66,3 +44,4 @@ io.on('connection', (socket) => {
     console.log('socket connected to client');
     socket.emit('message', 'hello world');
 });
+exports.default = app;

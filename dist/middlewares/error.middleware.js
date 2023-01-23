@@ -4,7 +4,8 @@ exports.notFoundError = exports.internalError = void 0;
 const internalError = (err, req, res, next) => {
     var _a;
     const errorCode = (_a = req.statusCode) !== null && _a !== void 0 ? _a : 500;
-    res.status(errorCode).json({ message: err.message, stack: err.stack });
+    const stack = process.env.ENV === 'production' ? err.message : err.stack;
+    res.status(errorCode).json({ message: err.message, stack });
     // next()
 };
 exports.internalError = internalError;
